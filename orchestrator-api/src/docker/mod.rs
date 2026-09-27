@@ -1,4 +1,5 @@
 pub mod postgres;
+pub mod utils;
 
 use crate::error::{AppError, AppResult};
 use bollard::{
