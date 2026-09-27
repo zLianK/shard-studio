@@ -11,6 +11,7 @@ mod error;
 mod generator;
 mod log;
 mod model;
+mod repository;
 mod routes;
 mod service;
 mod state;

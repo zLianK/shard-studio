@@ -5,22 +5,30 @@ use std::collections::HashMap;
 /// The PostgreSQL image used for creating containers.
 const POSTGRES_IMAGE: &str = "postgres:16-alpine";
 /// The port on which PostgreSQL is exposed within the container.
-const POSTGRES_PORT: u16 = 5433;
+const POSTGRES_PORT: u16 = 5432;
 
 /// PostgreSQL docker container information and configuration.
 pub struct PostgresContainer {
     image: String,
     name: String,
     body: ContainerCreateBody,
+    port: u16,
 }
 
 impl PostgresContainer {
     pub fn new() -> Self {
-        let image = POSTGRES_IMAGE.into();
         let port = next_postgres_port();
-        let name = format!("postgres-{port}");
-        let body = postgres_create_container_body(port);
-        Self { image, name, body }
+        Self {
+            image: POSTGRES_IMAGE.into(),
+            name: format!("postgres-{port}"),
+            body: postgres_create_container_body(port),
+            port,
+        }
+    }
+
+    /// Returns the host port bound to the container's PostgreSQL port.
+    pub fn host_port(&self) -> u16 {
+        self.port
     }
 }
 

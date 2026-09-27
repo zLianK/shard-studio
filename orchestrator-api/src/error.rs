@@ -14,6 +14,8 @@ pub enum AppError {
     SeedDistributionError(String),
     #[error("docker operation failed: {0}")]
     DockerError(String),
+    #[error("database operation failed: {0}")]
+    DatabaseError(String),
 }
 
 /// Type alias for application results.
@@ -30,6 +32,7 @@ impl IntoResponse for AppError {
         let (status, message) = match self {
             AppError::SeedDistributionError(msg) => (StatusCode::BAD_REQUEST, msg),
             AppError::DockerError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+            AppError::DatabaseError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
         };
 
         (status, Json(json!({ "error": message }))).into_response()
