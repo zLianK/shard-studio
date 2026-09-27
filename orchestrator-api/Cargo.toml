@@ -15,3 +15,5 @@ error-stack = { version = "0.8.0", features = ["anyhow"] }
 rand = "0.10.3"
 rand_distr = "0.6.0"
 fake = "5.1.0"
+bollard = "0.21.1"
+futures-util = "0.3.34"

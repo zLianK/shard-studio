@@ -1,6 +1,10 @@
 use crate::{
+    docker::{create_and_start_container, postgres::PostgresContainer},
     error::AppResult,
-    generator::{DataGenerator, uniform::UniformStrategy, zipfian::ZipfianStrategy},
+    generator::{
+        DataGenerator, strategy::DistributionStrategy, uniform::UniformStrategy,
+        zipfian::ZipfianStrategy,
+    },
 };
 use tracing::info;
 
@@ -13,22 +17,27 @@ pub struct SeedService;
 
 impl SeedService {
     /// Handles the uniform seeding request.
-    pub fn uniform(&self, n: u64) -> AppResult<()> {
-        let strategy = UniformStrategy::new(n)?;
-        let mut generator = DataGenerator::new(strategy, SEED);
-        for _ in 0..n {
-            info!("Generating uniform value {:?}", generator.generate());
-        }
-        Ok(())
+    pub async fn uniform(&self, n: u64) -> AppResult<()> {
+        data_seeding(n, UniformStrategy::new(n)?).await
     }
 
     /// Handles the zipfian seeding request.
-    pub fn zipfian(&self, n: u64, s: f64) -> AppResult<()> {
-        let strategy = ZipfianStrategy::new(n, s)?;
-        let mut generator = DataGenerator::new(strategy, SEED);
-        for _ in 0..n {
-            info!("Generating zipfian value {:?}", generator.generate());
-        }
-        Ok(())
+    pub async fn zipfian(&self, n: u64, s: f64) -> AppResult<()> {
+        data_seeding(n, ZipfianStrategy::new(n, s)?).await
     }
+}
+
+/// Performs the data seeding operation using t
+/// he specified distribution strategy.
+async fn data_seeding(n: u64, strategy: impl DistributionStrategy) -> AppResult<()> {
+    let mut generator = DataGenerator::new(strategy, SEED);
+    let container = PostgresContainer::new();
+    let id = create_and_start_container(container).await?;
+
+    info!("Started PostgreSQL container with ID: {}", id);
+
+    for _ in 0..n {
+        info!("Generating zipfian value {:?}", generator.generate());
+    }
+    Ok(())
 }

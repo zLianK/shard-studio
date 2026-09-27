@@ -12,6 +12,8 @@ use thiserror::Error;
 pub enum AppError {
     #[error("error occurred in seed distribution: {0}")]
     SeedDistributionError(String),
+    #[error("docker operation failed: {0}")]
+    DockerError(String),
 }
 
 /// Type alias for application results.
@@ -27,6 +29,7 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, message) = match self {
             AppError::SeedDistributionError(msg) => (StatusCode::BAD_REQUEST, msg),
+            AppError::DockerError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
         };
 
         (status, Json(json!({ "error": message }))).into_response()

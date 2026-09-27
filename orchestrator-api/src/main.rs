@@ -6,6 +6,7 @@ use tokio::net::TcpListener;
 use tracing::info;
 
 mod controller;
+mod docker;
 mod error;
 mod generator;
 mod log;
