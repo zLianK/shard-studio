@@ -1,5 +1,5 @@
 use crate::{
-    docker::{create_and_start_container, postgres::PostgresContainer},
+    docker::{create_and_start_container, postgres::PostgresContainer, utils::container_name_main},
     error::AppResult,
     generator::{
         DataGenerator, DataObject, strategy::DistributionStrategy, uniform::UniformStrategy,
@@ -35,7 +35,7 @@ impl SeedService {
 /// he specified distribution strategy.
 async fn data_seeding(n: u64, strategy: impl DistributionStrategy) -> AppResult<()> {
     let mut generator = DataGenerator::new(strategy, SEED);
-    let container = PostgresContainer::new();
+    let container = PostgresContainer::new(container_name_main());
     let host_port = container.host_port();
     let id = create_and_start_container(container).await?;
 

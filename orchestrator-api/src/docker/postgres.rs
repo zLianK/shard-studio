@@ -16,11 +16,11 @@ pub struct PostgresContainer {
 }
 
 impl PostgresContainer {
-    pub fn new() -> Self {
+    pub fn new(name: String) -> Self {
         let port = next_postgres_port();
         Self {
             image: POSTGRES_IMAGE.into(),
-            name: format!("postgres-{port}"),
+            name,
             body: postgres_create_container_body(port),
             port,
         }
