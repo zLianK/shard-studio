@@ -27,6 +27,13 @@ pub trait DockerContainer {
     fn body(&self) -> ContainerCreateBody;
 }
 
+/// Creates a new Docker daemon client. 
+/// 
+/// It is cheap to call as no network I/O happens here. 
+/// Regardless, Bollard opens a fresh connection per 
+/// Docker API call, so caching this client would not 
+/// save any connections.
+/// 
 fn get_docker_daemon() -> AppResult<Docker> {
     Docker::connect_with_local_defaults().change_context(AppError::DockerError(
         "failed to connect to docker daemon".into(),
