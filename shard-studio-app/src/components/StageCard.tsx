@@ -23,7 +23,7 @@ function StageCard({ step, title, description, icon }: StageCardProps) {
       </div>
       <h3 className="stage-card__title">{title}</h3>
       <p className="stage-card__description">{description}</p>
-      <span className="stage-card__badge">Coming in the next stages</span>
+      <span className="stage-card__badge">Coming soon!</span>
     </article>
   )
 }

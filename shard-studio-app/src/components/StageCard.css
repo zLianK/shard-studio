@@ -1,12 +1,12 @@
 .stage-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-height: 280px;
-  padding: 24px;
+  gap: 0.5rem;
+  min-height: 17.5rem;
+  padding: 1.5rem;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 0.75rem;
   transition: border-color 0.15s ease;
 }
 
@@ -18,22 +18,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .stage-card__icon {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
   color: var(--accent);
   background: var(--accent-soft);
 }
 
 .stage-card__glyph {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   background-color: currentColor;
   mask: var(--icon) center / contain no-repeat;
 }
@@ -54,7 +54,7 @@
 
 .stage-card__description {
   flex: 1;
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
   color: var(--text-muted);
   font-size: 0.875rem;
   line-height: 1.5;
@@ -62,7 +62,7 @@
 
 .stage-card__badge {
   align-self: flex-start;
-  padding: 4px 10px;
+  padding: 0.25rem 0.625rem;
   font-size: 0.75rem;
   color: var(--text-muted);
   background: var(--panel);
