@@ -36,7 +36,7 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-/// Returns a TCP listener for the orchestrator API.
+/// Returns a TCP listener for the Shard Studio API.
 async fn get_listener() -> TcpListener {
     let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
     let addr = listener.local_addr().unwrap();
