@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import './ErrorToast.css'
 
+const DURATION_MS = 5000
+
 let show: (message: string) => void = () => {}
 
 /**
  * Shows an error toast with the given message.
- * 
- * @param message {@code string} The error message to display.
+ *
+ * @param message The error message to display.
  */
 export function showError(message: string) {
   show(message)
@@ -31,7 +33,7 @@ function ErrorToast() {
 
   useEffect(() => {
     if (!visible) return
-    const timer = setTimeout(() => setVisible(false), 5000)
+    const timer = setTimeout(() => setVisible(false), DURATION_MS)
     return () => clearTimeout(timer)
   }, [visible, message])
 

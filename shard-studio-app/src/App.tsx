@@ -1,8 +1,8 @@
 import './App.css'
+import ResetButton from './components/buttons/ResetButton'
+import ThemeButton from './components/buttons/ThemeButton'
 import ErrorToast from './components/ErrorToast'
-import ResetButton from './components/ResetButton'
 import StageCards from './components/StageCards'
-import ThemeToggle from './components/ThemeToggle'
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
             </div>
             <div className="panel__actions">
               <ResetButton />
-              <ThemeToggle />
+              <ThemeButton />
             </div>
           </div>
           <p className="panel__subtitle">
