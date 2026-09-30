@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { showError } from './ErrorToast'
+import { showError } from '../ErrorToast'
+import './IconButton.css'
 import './ResetButton.css'
 
 /**
@@ -28,7 +29,7 @@ function ResetButton() {
   return (
     <button
       type="button"
-      className="reset-button"
+      className="icon-button reset-button"
       onClick={handleReset}
       disabled={loading}
       aria-label="Reset simulation"

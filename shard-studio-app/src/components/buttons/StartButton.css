@@ -1,0 +1,20 @@
+.start-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0.75rem var(--accent-soft);
+}
+
+.start-button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.start-button__icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  background-color: currentColor;
+  mask: url('../../assets/icons/play.svg') center / contain no-repeat;
+}

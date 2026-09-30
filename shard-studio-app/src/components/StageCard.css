@@ -7,11 +7,6 @@
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
-  transition: border-color 0.15s ease;
-}
-
-.stage-card:hover {
-  border-color: var(--accent);
 }
 
 .stage-card__header {
@@ -60,12 +55,8 @@
   line-height: 1.5;
 }
 
-.stage-card__badge {
-  align-self: flex-start;
-  padding: 0.25rem 0.625rem;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  background: var(--panel);
-  border: 1px dashed var(--border);
-  border-radius: 999px;
+.stage-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }

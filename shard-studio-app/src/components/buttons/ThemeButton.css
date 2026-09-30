@@ -1,0 +1,27 @@
+/* The sun and moon icons are stacked in the same grid cell. */
+.theme-button {
+  display: grid;
+  place-items: center;
+}
+
+.theme-button__icon {
+  grid-area: 1 / 1;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: currentColor;
+  mask: var(--icon) center / contain no-repeat;
+  opacity: 0;
+}
+
+.theme-button__icon--sun {
+  --icon: url('../../assets/icons/sun.svg');
+}
+
+.theme-button__icon--moon {
+  --icon: url('../../assets/icons/moon.svg');
+}
+
+:root[data-theme='dark'] .theme-button__icon--sun,
+:root[data-theme='light'] .theme-button__icon--moon {
+  opacity: 1;
+}

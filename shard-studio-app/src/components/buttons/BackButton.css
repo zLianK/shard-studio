@@ -1,0 +1,12 @@
+.back-button {
+  --icon-button-bg: var(--panel);
+}
+
+/* The down chevron, rotated to point left. */
+.back-button__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: currentColor;
+  mask: url('../../assets/icons/chevron-down.svg') center / contain no-repeat;
+  transform: rotate(90deg);
+}

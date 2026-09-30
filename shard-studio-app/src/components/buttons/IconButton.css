@@ -1,0 +1,36 @@
+/*
+ * Shared base for the bordered, icon-sized buttons (ResetButton, ThemeButton, BackButton).
+ * Set --icon-button-bg on the button to change its background.
+ */
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  color: var(--text-muted);
+  background: var(--icon-button-bg, var(--card));
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.icon-button:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.icon-button:focus-visible {
+  outline: 0.125rem solid var(--accent);
+  outline-offset: 0.125rem;
+}
+
+.icon-button:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}

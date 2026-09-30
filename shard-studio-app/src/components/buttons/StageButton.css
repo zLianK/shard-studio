@@ -1,0 +1,29 @@
+/* Shared base for the stage action buttons (ConfigureButton, StartButton). */
+.stage-button {
+  padding: 0.4rem 0.9rem;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    filter 0.15s ease;
+}
+
+.stage-button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.stage-button:focus-visible {
+  outline: 0.125rem solid var(--accent);
+  outline-offset: 0.125rem;
+}
+
+.stage-button:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
