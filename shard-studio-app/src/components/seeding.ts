@@ -6,34 +6,34 @@ export type Distribution = 'uniform' | 'zipfian'
 export type SeedConfig = {
   distribution: Distribution
   n: string
-  s: string
+  k: string
 }
 
 export const defaultSeedConfig: SeedConfig = {
   distribution: 'uniform',
-  n: '1000',
-  s: '1.1',
+  n: '1000000',
+  k: '1000',
 }
 
 /**
  * Starts the seeding with the given settings. Errors are logged to the console
  * and shown to the user as a friendly message.
  */
-export async function startSeeding({ distribution, n, s }: SeedConfig): Promise<void> {
+export async function startSeeding({ distribution, n, k }: SeedConfig): Promise<void> {
   const count = Number(n)
-  const skew = Number(s)
+  const keys = Number(k)
 
   if (!Number.isInteger(count) || count < 1) {
     showError('The number of records must be a positive integer.')
     return
   }
-  if (distribution === 'zipfian' && (!Number.isFinite(skew) || skew < 0)) {
-    showError('The skew must be a number greater than or equal to 0.')
+  if (!Number.isInteger(keys) || keys < 1) {
+    showError('The number of keys must be a positive integer.')
     return
   }
 
   try {
-    const body = distribution === 'uniform' ? { n: count } : { n: count, s: skew }
+    const body = { n: count, k: keys }
     const response = await fetch(`/api/seed/${distribution}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

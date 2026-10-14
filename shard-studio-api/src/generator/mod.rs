@@ -49,7 +49,7 @@ pub mod test {
     fn generate_zipfian_test() {
         let number_of_elements = 1000;
 
-        let strategy = ZipfianStrategy::new(number_of_elements, 1.0).unwrap();
+        let strategy = ZipfianStrategy::new(number_of_elements).unwrap();
         let mut generator = DataGenerator::new(strategy, 42);
 
         for _ in 0..number_of_elements {

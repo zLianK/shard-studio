@@ -85,18 +85,16 @@ function SeedPanel({ origin, config, onChange, onClose }: SeedPanelProps) {
             />
           </label>
 
-          {config.distribution === 'zipfian' && (
-            <label className="seed-panel__field">
-              <span>Skew (s)</span>
-              <input
-                type="number"
-                min={0}
-                step="any"
-                value={config.s}
-                onChange={(event) => onChange({ ...config, s: event.target.value })}
-              />
-            </label>
-          )}
+          <label className="seed-panel__field">
+            <span>Key space size (k)</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={config.k}
+              onChange={(event) => onChange({ ...config, k: event.target.value })}
+            />
+          </label>
         </div>
       </div>
     </section>
