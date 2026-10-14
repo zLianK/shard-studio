@@ -13,9 +13,10 @@ pub struct UniformStrategy {
 }
 
 impl UniformStrategy {
-    pub fn new(n: u64) -> AppResult<Self> {
+    /// Creates a strategy over a key space of `k` keys.
+    pub fn new(k: u64) -> AppResult<Self> {
         Ok(Self {
-            uniform: Uniform::new_inclusive(1, n).change_context(
+            uniform: Uniform::new_inclusive(1, k).change_context(
                 AppError::SeedDistributionError("failed to create uniform strategy".to_string()),
             )?,
         })

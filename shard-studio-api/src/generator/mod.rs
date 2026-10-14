@@ -1,5 +1,4 @@
 use crate::generator::strategy::DistributionStrategy;
-use fake::{Fake, faker::lorem::en::Sentence};
 use rand::{SeedableRng, rngs::StdRng};
 use serde::{Deserialize, Serialize};
 
@@ -7,8 +6,8 @@ pub mod strategy;
 pub mod uniform;
 pub mod zipfian;
 
-/// The number of words in the generated text.
-const NUMBER_OF_WORDS: usize = 25;
+/// The size, in bytes, of the text of every data object.
+pub const TEXT_SIZE: usize = 256;
 
 /// A data object that represents a single unit of data in the system.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -22,20 +21,24 @@ pub struct DataObject {
 pub struct DataGenerator<T: DistributionStrategy> {
     strategy: T,
     rng: StdRng,
+    text: String,
 }
 
 impl<T: DistributionStrategy> DataGenerator<T> {
     pub fn new(strategy: T, seed: u64) -> Self {
         let rng = StdRng::seed_from_u64(seed);
-        Self { strategy, rng }
+        let text = "a".repeat(TEXT_SIZE);
+        Self { strategy, rng, text }
     }
 
     /// Generates a data object using the distribution strategy.
+    /// The text is always the same, [`TEXT_SIZE`] bytes long.
     pub fn generate(&mut self) -> DataObject {
         let id = self.strategy.next(&mut self.rng);
-        let range = NUMBER_OF_WORDS..(NUMBER_OF_WORDS + 1);
-        let text: String = Sentence(range).fake_with_rng(&mut self.rng);
-        DataObject { id, text }
+        DataObject {
+            id,
+            text: self.text.clone(),
+        }
     }
 }
 
@@ -49,14 +52,13 @@ pub mod test {
     fn generate_zipfian_test() {
         let number_of_elements = 1000;
 
-        let strategy = ZipfianStrategy::new(number_of_elements, 1.0).unwrap();
+        let strategy = ZipfianStrategy::new(number_of_elements).unwrap();
         let mut generator = DataGenerator::new(strategy, 42);
 
         for _ in 0..number_of_elements {
             let data = generator.generate();
-            assert!(data.text.len() > 128 && data.text.len() < 256);
+            assert_eq!(data.text.len(), TEXT_SIZE);
             assert!(data.id >= 1 && data.id <= number_of_elements);
-            assert!(data.text.split(" ").count() == NUMBER_OF_WORDS);
         }
     }
 
@@ -69,9 +71,8 @@ pub mod test {
 
         for _ in 0..number_of_elements {
             let data = generator.generate();
-            assert!(data.text.len() > 128 && data.text.len() < 256);
+            assert_eq!(data.text.len(), TEXT_SIZE);
             assert!(data.id >= 1 && data.id <= number_of_elements);
-            assert!(data.text.split(" ").count() == NUMBER_OF_WORDS);
         }
     }
 }

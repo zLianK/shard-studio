@@ -10,7 +10,7 @@ pub async fn uniform_seed(
     State(state): State<AppState>,
     Json(payload): Json<UniformSeed>,
 ) -> Result<StatusCode, AppError> {
-    state.seed_service.uniform(payload.n).await?;
+    state.seed_service.uniform(payload.n, payload.k).await?;
     Ok(StatusCode::OK)
 }
 
@@ -19,6 +19,6 @@ pub async fn zipfian_seed(
     State(state): State<AppState>,
     Json(payload): Json<ZipfianSeed>,
 ) -> Result<StatusCode, AppError> {
-    state.seed_service.zipfian(payload.n, payload.s).await?;
+    state.seed_service.zipfian(payload.n, payload.k).await?;
     Ok(StatusCode::OK)
 }
