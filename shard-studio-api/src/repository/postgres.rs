@@ -40,7 +40,7 @@ impl PostgresRepository {
             "CREATE TABLE IF NOT EXISTS data_objects (\
                 row_id BIGSERIAL PRIMARY KEY, \
                 id BIGINT NOT NULL, \
-                text TEXT NOT NULL\
+                text CHAR(256) NOT NULL\
             )",
         )
         .execute(&self.pool)
