@@ -7,6 +7,9 @@ import './SeedPanel.css'
 const distributions: DropdownOption<Distribution>[] = [
   { value: 'uniform', label: 'Uniform', description: 'Keys are spread evenly.' },
   { value: 'zipfian', label: 'Zipfian', description: 'A few keys are far more frequent.' },
+  {
+    value: 'hotspot', label: 'Hotspot', description: '20% of the keys holds 80% of the rows.',
+  },
 ]
 
 /** Position and size of the card, relative to the container the panel lives in. */

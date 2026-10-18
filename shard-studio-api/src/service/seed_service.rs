@@ -2,8 +2,8 @@ use crate::{
     docker::{create_and_start_container, postgres::PostgresContainer, utils::container_name_main},
     error::AppResult,
     generator::{
-        DataGenerator, DataObject, strategy::DistributionStrategy, uniform::UniformStrategy,
-        zipfian::ZipfianStrategy,
+        DataGenerator, DataObject, hotspot::HotspotStrategy, strategy::DistributionStrategy,
+        uniform::UniformStrategy, zipfian::ZipfianStrategy,
     },
     repository::postgres::PostgresRepository,
 };
@@ -28,6 +28,12 @@ impl SeedService {
     /// Handles the zipfian seeding request: `n` rows with ids in `1..=k`.
     pub async fn zipfian(&self, n: u64, k: u64) -> AppResult<()> {
         data_seeding(n, ZipfianStrategy::new(k)?).await
+    }
+
+    /// Handles the hotspot seeding request: `n` rows with ids in `1..=k`,
+    /// 80% of them inside the first 20% of the key space.
+    pub async fn hotspot(&self, n: u64, k: u64) -> AppResult<()> {
+        data_seeding(n, HotspotStrategy::new(k)?).await
     }
 }
 

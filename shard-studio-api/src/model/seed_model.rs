@@ -9,6 +9,15 @@ pub struct UniformSeed {
     pub k: u64,
 }
 
+/// Parameters for hotspot seeding.
+#[derive(Debug, Deserialize)]
+pub struct HotspotSeed {
+    /// Number of rows to insert.
+    pub n: u64,
+    /// Size of the key space.
+    pub k: u64,
+}
+
 /// Parameters for zipfian seeding.
 #[derive(Debug, Deserialize)]
 pub struct ZipfianSeed {

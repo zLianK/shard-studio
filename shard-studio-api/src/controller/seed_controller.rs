@@ -1,6 +1,6 @@
 use crate::{
     error::AppError,
-    model::seed_model::{UniformSeed, ZipfianSeed},
+    model::seed_model::{HotspotSeed, UniformSeed, ZipfianSeed},
     state::AppState,
 };
 use axum::{Json, extract::State, http::StatusCode};
@@ -20,5 +20,14 @@ pub async fn zipfian_seed(
     Json(payload): Json<ZipfianSeed>,
 ) -> Result<StatusCode, AppError> {
     state.seed_service.zipfian(payload.n, payload.k).await?;
+    Ok(StatusCode::OK)
+}
+
+/// Handles the hotspot seeding request.
+pub async fn hotspot_seed(
+    State(state): State<AppState>,
+    Json(payload): Json<HotspotSeed>,
+) -> Result<StatusCode, AppError> {
+    state.seed_service.hotspot(payload.n, payload.k).await?;
     Ok(StatusCode::OK)
 }

@@ -1,6 +1,6 @@
 import { showError } from './ErrorToast'
 
-export type Distribution = 'uniform' | 'zipfian'
+export type Distribution = 'uniform' | 'zipfian' | 'hotspot'
 
 /** Seeding settings, kept as strings so they can be bound to inputs. */
 export type SeedConfig = {
