@@ -2,6 +2,7 @@ use crate::generator::strategy::DistributionStrategy;
 use rand::{SeedableRng, rngs::StdRng};
 use serde::{Deserialize, Serialize};
 
+pub mod hotspot;
 pub mod strategy;
 pub mod uniform;
 pub mod zipfian;
@@ -45,6 +46,7 @@ impl<T: DistributionStrategy> DataGenerator<T> {
 #[cfg(test)]
 pub mod test {
     use super::*;
+    use crate::generator::hotspot::HotspotStrategy;
     use crate::generator::uniform::UniformStrategy;
     use crate::generator::zipfian::ZipfianStrategy;
 
@@ -74,5 +76,26 @@ pub mod test {
             assert_eq!(data.text.len(), TEXT_SIZE);
             assert!(data.id >= 1 && data.id <= number_of_elements);
         }
+    }
+
+    #[test]
+    fn generate_hotspot_test() {
+        let number_of_elements = 10_000;
+        let k = 1000;
+
+        let strategy = HotspotStrategy::new(k).unwrap();
+        let mut generator = DataGenerator::new(strategy, 42);
+
+        let mut hot = 0;
+        for _ in 0..number_of_elements {
+            let data = generator.generate();
+            assert_eq!(data.text.len(), TEXT_SIZE);
+            assert!(data.id >= 1 && data.id <= k);
+            if data.id <= k / 5 {
+                hot += 1;
+            }
+        }
+        let ratio = hot as f64 / number_of_elements as f64;
+        assert!((0.78..=0.82).contains(&ratio), "hot ratio was {ratio}");
     }
 }

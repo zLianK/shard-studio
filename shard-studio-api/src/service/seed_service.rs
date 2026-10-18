@@ -2,9 +2,10 @@ use crate::{
     docker::{create_and_start_container, postgres::PostgresContainer, utils::container_name_main},
     error::AppResult,
     generator::{
-        DataGenerator, DataObject, strategy::DistributionStrategy, uniform::UniformStrategy,
-        zipfian::ZipfianStrategy,
+        DataGenerator, DataObject, hotspot::HotspotStrategy, strategy::DistributionStrategy,
+        uniform::UniformStrategy, zipfian::ZipfianStrategy,
     },
+    model::seed_model::{Distribution, SeedRequest},
     repository::postgres::PostgresRepository,
 };
 use tracing::info;
@@ -20,14 +21,15 @@ const BATCH_SIZE: usize = 1000;
 pub struct SeedService;
 
 impl SeedService {
-    /// Handles the uniform seeding request: `n` rows with ids in `1..=k`.
-    pub async fn uniform(&self, n: u64, k: u64) -> AppResult<()> {
-        data_seeding(n, UniformStrategy::new(k)?).await
-    }
-
-    /// Handles the zipfian seeding request: `n` rows with ids in `1..=k`.
-    pub async fn zipfian(&self, n: u64, k: u64) -> AppResult<()> {
-        data_seeding(n, ZipfianStrategy::new(k)?).await
+    /// Handles the seeding request: `n` rows with ids in `1..=k`
+    /// following the requested distribution.
+    pub async fn seed(&self, request: SeedRequest) -> AppResult<()> {
+        let SeedRequest { distribution, n, k } = request;
+        match distribution {
+            Distribution::Uniform => data_seeding(n, UniformStrategy::new(k)?).await,
+            Distribution::Zipfian => data_seeding(n, ZipfianStrategy::new(k)?).await,
+            Distribution::Hotspot => data_seeding(n, HotspotStrategy::new(k)?).await,
+        }
     }
 }
 

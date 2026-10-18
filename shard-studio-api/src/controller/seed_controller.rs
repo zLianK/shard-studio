@@ -1,24 +1,11 @@
-use crate::{
-    error::AppError,
-    model::seed_model::{UniformSeed, ZipfianSeed},
-    state::AppState,
-};
+use crate::{error::AppError, model::seed_model::SeedRequest, state::AppState};
 use axum::{Json, extract::State, http::StatusCode};
 
-/// Handles the uniform seeding request.
-pub async fn uniform_seed(
+/// Handles the seeding request.
+pub async fn seed(
     State(state): State<AppState>,
-    Json(payload): Json<UniformSeed>,
+    Json(payload): Json<SeedRequest>,
 ) -> Result<StatusCode, AppError> {
-    state.seed_service.uniform(payload.n, payload.k).await?;
-    Ok(StatusCode::OK)
-}
-
-/// Handles the zipfian seeding request.
-pub async fn zipfian_seed(
-    State(state): State<AppState>,
-    Json(payload): Json<ZipfianSeed>,
-) -> Result<StatusCode, AppError> {
-    state.seed_service.zipfian(payload.n, payload.k).await?;
+    state.seed_service.seed(payload).await?;
     Ok(StatusCode::OK)
 }
