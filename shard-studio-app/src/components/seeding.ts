@@ -33,8 +33,8 @@ export async function startSeeding({ distribution, n, k }: SeedConfig): Promise<
   }
 
   try {
-    const body = { n: count, k: keys }
-    const response = await fetch(`/api/seed/${distribution}`, {
+    const body = { distribution, n: count, k: keys }
+    const response = await fetch('/api/seed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
