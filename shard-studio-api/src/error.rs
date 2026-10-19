@@ -16,6 +16,10 @@ pub enum AppError {
     DockerError(String),
     #[error("database operation failed: {0}")]
     DatabaseError(String),
+    #[error("report operation failed: {0}")]
+    ReportError(String),
+    #[error("there is no report in progress to save, run the seeding first")]
+    NoCurrentReport,
 }
 
 /// Type alias for application results.
@@ -33,6 +37,8 @@ impl IntoResponse for AppError {
             AppError::SeedDistributionError(msg) => (StatusCode::BAD_REQUEST, msg),
             AppError::DockerError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
             AppError::DatabaseError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+            AppError::ReportError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+            AppError::NoCurrentReport => (StatusCode::CONFLICT, self.to_string()),
         };
 
         (status, Json(json!({ "error": message }))).into_response()

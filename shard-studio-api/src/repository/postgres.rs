@@ -1,6 +1,7 @@
 use crate::{
     error::{AppError, AppResult},
     generator::DataObject,
+    model::report_model::KeyFrequency,
 };
 use error_stack::{IntoReport, ResultExt, bail};
 use sqlx::{PgPool, QueryBuilder, postgres::PgPoolOptions};
@@ -50,6 +51,22 @@ impl PostgresRepository {
         ))?;
 
         Ok(())
+    }
+
+    /// Returns the frequency histogram of the keys, ordered by key.
+    pub async fn key_histogram(&self) -> AppResult<Vec<KeyFrequency>> {
+        let rows: Vec<(i64, i64)> =
+            sqlx::query_as("SELECT id, COUNT(*) FROM data_objects GROUP BY id ORDER BY id")
+                .fetch_all(&self.pool)
+                .await
+                .change_context(AppError::DatabaseError(
+                    "failed to compute key histogram".into(),
+                ))?;
+
+        Ok(rows
+            .into_iter()
+            .map(|(key, count)| KeyFrequency { key, count })
+            .collect())
     }
 
     /// Saves all of the given data objects to the database.

@@ -1,7 +1,9 @@
 use crate::{
     log::log_install,
     routes::app_routes,
-    service::{reset_service::ResetService, seed_service::SeedService},
+    service::{
+        report_service::ReportService, reset_service::ResetService, seed_service::SeedService,
+    },
     state::AppState,
 };
 use std::sync::Arc;
@@ -23,12 +25,14 @@ mod state;
 async fn main() {
     log_install();
 
-    let seed_service = Arc::new(SeedService);
-    let reset_service = Arc::new(ResetService);
+    let report_service = Arc::new(ReportService::new());
+    let seed_service = Arc::new(SeedService::new(report_service.clone()));
+    let reset_service = Arc::new(ResetService::new(report_service.clone()));
 
     let state = AppState {
         seed_service,
         reset_service,
+        report_service,
     };
     let app = app_routes().with_state(state);
 
