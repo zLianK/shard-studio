@@ -1,5 +1,6 @@
 import './App.css'
 import ResetButton from './components/buttons/ResetButton'
+import SaveReportButton from './components/buttons/SaveReportButton'
 import ThemeButton from './components/buttons/ThemeButton'
 import ErrorToast from './components/ErrorToast'
 import StageCards from './components/StageCards'
@@ -16,6 +17,7 @@ function App() {
             </div>
             <div className="panel__actions">
               <ResetButton />
+              <SaveReportButton />
               <ThemeButton />
             </div>
           </div>

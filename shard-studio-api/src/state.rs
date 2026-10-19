@@ -1,4 +1,6 @@
-use crate::service::{reset_service::ResetService, seed_service::SeedService};
+use crate::service::{
+    report_service::ReportService, reset_service::ResetService, seed_service::SeedService,
+};
 use std::sync::Arc;
 
 /// Application state shared across the Shard Studio API.
@@ -6,4 +8,5 @@ use std::sync::Arc;
 pub struct AppState {
     pub seed_service: Arc<SeedService>,
     pub reset_service: Arc<ResetService>,
+    pub report_service: Arc<ReportService>,
 }
