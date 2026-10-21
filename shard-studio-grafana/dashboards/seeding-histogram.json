@@ -1,0 +1,69 @@
+{
+  "uid": "shard-studio-seeding",
+  "title": "Shard Studio - Seeding",
+  "schemaVersion": 39,
+  "version": 1,
+  "templating": {
+    "list": [
+      {
+        "name": "report",
+        "label": "Report",
+        "type": "query",
+        "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+        "query": {
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "url",
+            "format": "table",
+            "parser": "backend",
+            "url": "/",
+            "url_options": { "method": "GET" },
+            "root_selector": "$[type=\"file\" and $contains(name, \".json\")]",
+            "columns": [{ "selector": "name", "text": "name", "type": "string" }]
+          }
+        },
+        "refresh": 2,
+        "sort": 2,
+        "multi": false,
+        "includeAll": false,
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "barchart",
+      "title": "Key Histogram",
+      "gridPos": { "h": 16, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/${report}",
+          "url_options": { "method": "GET" },
+          "root_selector": "seeding.key_histogram",
+          "columns": [
+            { "selector": "key", "text": "key", "type": "number" },
+            { "selector": "count", "text": "count", "type": "number" }
+          ]
+        }
+      ],
+      "options": {
+        "xField": "key",
+        "showValue": "never",
+        "legend": { "showLegend": false },
+        "barWidth": 1,
+        "groupWidth": 1,
+        "xTickLabelSpacing": 100
+      }
+    }
+  ]
+}
