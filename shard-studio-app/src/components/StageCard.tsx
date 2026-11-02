@@ -1,7 +1,7 @@
 import { useRef, type CSSProperties } from 'react'
 import ConfigureButton from './buttons/ConfigureButton'
 import StartButton from './buttons/StartButton'
-import type { PanelOrigin } from './SeedPanel'
+import type { PanelOrigin } from './StagePanel'
 import './StageCard.css'
 
 type StageCardProps = {

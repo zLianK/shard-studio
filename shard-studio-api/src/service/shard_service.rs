@@ -4,10 +4,7 @@ use crate::{
     model::shard_model::{ShardRequest, ShardingAlgorithm},
     repository::postgres::PostgresRepository,
     service::cluster_service::ClusterService,
-    sharding::{
-        hash::HashStrategy,
-        strategy::{self, ShardingStrategy},
-    },
+    sharding::{hash::HashStrategy, strategy::ShardingStrategy},
 };
 use error_stack::bail;
 use std::sync::Arc;
@@ -78,7 +75,7 @@ async fn distribute_rows(
 }
 
 /// Builds the sharding strategy described by the request.
-fn build_strategy(request: &ShardRequest) -> AppResult<Box<dyn strategy::ShardingStrategy>> {
+fn build_strategy(request: &ShardRequest) -> AppResult<Box<dyn ShardingStrategy>> {
     if request.shards > MAX_SHARDS {
         bail!(AppError::ShardingError(format!(
             "the number of shards must be at most {MAX_SHARDS}"

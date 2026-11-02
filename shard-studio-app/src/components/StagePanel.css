@@ -1,4 +1,4 @@
-.seed-panel {
+.stage-panel {
   position: absolute;
   z-index: 1;
   overflow: hidden;
@@ -14,12 +14,12 @@
     border-color 0.3s ease;
 }
 
-.seed-panel--expanded {
+.stage-panel--expanded {
   overflow: auto;
   border-color: var(--accent);
 }
 
-.seed-panel__content {
+.stage-panel__content {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -28,30 +28,30 @@
   transition: opacity 0.15s ease;
 }
 
-.seed-panel--expanded .seed-panel__content {
+.stage-panel--expanded .stage-panel__content {
   opacity: 1;
   transition: opacity 0.2s ease 0.15s;
 }
 
-.seed-panel__header {
+.stage-panel__header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.seed-panel__title {
+.stage-panel__title {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
-.seed-panel__fields {
+.stage-panel__fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
   gap: 1rem;
 }
 
-.seed-panel__field {
+.stage-panel__field {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
@@ -59,8 +59,8 @@
   color: var(--text-muted);
 }
 
-.seed-panel__field select,
-.seed-panel__field input {
+.stage-panel__field select,
+.stage-panel__field input {
   height: 2.5rem;
   padding: 0 0.75rem;
   color: var(--text);
@@ -70,8 +70,8 @@
   border-radius: 0.625rem;
 }
 
-.seed-panel__field select:focus-visible,
-.seed-panel__field input:focus-visible {
+.stage-panel__field select:focus-visible,
+.stage-panel__field input:focus-visible {
   outline: 0.125rem solid var(--accent);
   outline-offset: 0.125rem;
 }

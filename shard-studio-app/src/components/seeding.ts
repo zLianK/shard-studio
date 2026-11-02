@@ -1,3 +1,4 @@
+import { post } from './api'
 import { showError } from './ErrorToast'
 
 export type Distribution = 'uniform' | 'zipfian' | 'hotspot'
@@ -32,20 +33,8 @@ export async function startSeeding({ distribution, n, k }: SeedConfig): Promise<
     return
   }
 
-  try {
-    const body = { distribution, n: count, k: keys }
-    const response = await fetch('/api/seed', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-    if (!response.ok) {
-      const error = await response.json().catch(() => null)
-      console.error(`Seeding failed (${response.status}):`, error?.error ?? error)
-      showError('An error occurred while seeding the database.')
-    }
-  } catch (error) {
-    console.error('Could not reach the API:', error)
-    showError('Could not reach the API.')
-  }
+  await post('/seed', {
+    body: { distribution, n: count, k: keys },
+    error: 'An error occurred while seeding the database.',
+  })
 }

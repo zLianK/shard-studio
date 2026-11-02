@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { showError } from '../ErrorToast'
+import { post } from '../api'
 import './IconButton.css'
 import './SaveReportButton.css'
 
@@ -11,19 +11,8 @@ function SaveReportButton() {
 
   const handleSave = async () => {
     setLoading(true)
-    try {
-      const response = await fetch('/api/report', { method: 'POST' })
-      if (!response.ok) {
-        const body = await response.json().catch(() => null)
-        console.error(`Saving the report failed (${response.status}):`, body?.error ?? body)
-        showError(body?.error ?? 'An error occurred while saving the report.')
-      }
-    } catch (error) {
-      console.error('Could not reach the API:', error)
-      showError('Could not reach the API.')
-    } finally {
-      setLoading(false)
-    }
+    await post('/report', { error: 'An error occurred while saving the report.' })
+    setLoading(false)
   }
 
   return (
