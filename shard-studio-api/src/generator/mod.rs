@@ -29,7 +29,11 @@ impl<T: DistributionStrategy> DataGenerator<T> {
     pub fn new(strategy: T, seed: u64) -> Self {
         let rng = StdRng::seed_from_u64(seed);
         let text = "a".repeat(TEXT_SIZE);
-        Self { strategy, rng, text }
+        Self {
+            strategy,
+            rng,
+            text,
+        }
     }
 
     /// Generates a data object using the distribution strategy.

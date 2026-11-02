@@ -16,9 +16,15 @@ pub enum AppError {
     DockerError(String),
     #[error("database operation failed: {0}")]
     DatabaseError(String),
+    #[error("sharding operation failed: {0}")]
+    ShardingError(String),
+    #[error("cluster operation failed: {0}")]
+    ClusterError(String),
+    #[error("there is no main database running")]
+    NoMainDatabase,
     #[error("report operation failed: {0}")]
     ReportError(String),
-    #[error("there is no report in progress to save, run the seeding first")]
+    #[error("there is no report in progress to save")]
     NoCurrentReport,
 }
 
@@ -37,6 +43,9 @@ impl IntoResponse for AppError {
             AppError::SeedDistributionError(msg) => (StatusCode::BAD_REQUEST, msg),
             AppError::DockerError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
             AppError::DatabaseError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+            AppError::ShardingError(msg) => (StatusCode::BAD_REQUEST, msg),
+            AppError::ClusterError(msg) => (StatusCode::CONFLICT, msg),
+            AppError::NoMainDatabase => (StatusCode::CONFLICT, self.to_string()),
             AppError::ReportError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
             AppError::NoCurrentReport => (StatusCode::CONFLICT, self.to_string()),
         };

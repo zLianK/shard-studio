@@ -6,6 +6,11 @@ pub fn container_name_main() -> String {
     format!("{CONTAINER_NAME_PREFIX}-main")
 }
 
+/// Returns the name for the container of the shard with the given index.
+pub fn container_name_shard(index: usize) -> String {
+    format!("{CONTAINER_NAME_PREFIX}-shard-{index}")
+}
+
 /// Returns the prefix shared by all container names created by Shard Studio.
 pub fn container_name_prefix() -> String {
     CONTAINER_NAME_PREFIX.into()

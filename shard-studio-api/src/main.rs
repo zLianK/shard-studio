@@ -2,7 +2,8 @@ use crate::{
     log::log_install,
     routes::app_routes,
     service::{
-        report_service::ReportService, reset_service::ResetService, seed_service::SeedService,
+        cluster_service::ClusterService, report_service::ReportService,
+        reset_service::ResetService, seed_service::SeedService, shard_service::ShardService,
     },
     state::AppState,
 };
@@ -19,18 +20,28 @@ mod model;
 mod repository;
 mod routes;
 mod service;
+mod sharding;
 mod state;
 
 #[tokio::main]
 async fn main() {
     log_install();
 
+    let cluster_service = Arc::new(ClusterService::new());
     let report_service = Arc::new(ReportService::new());
-    let seed_service = Arc::new(SeedService::new(report_service.clone()));
-    let reset_service = Arc::new(ResetService::new(report_service.clone()));
+    let seed_service = Arc::new(SeedService::new(
+        cluster_service.clone(),
+        report_service.clone(),
+    ));
+    let shard_service = Arc::new(ShardService::new(cluster_service.clone()));
+    let reset_service = Arc::new(ResetService::new(
+        cluster_service.clone(),
+        report_service.clone(),
+    ));
 
     let state = AppState {
         seed_service,
+        shard_service,
         reset_service,
         report_service,
     };
