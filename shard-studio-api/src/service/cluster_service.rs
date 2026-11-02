@@ -106,3 +106,22 @@ async fn start_repository(name: String) -> AppResult<PostgresRepository> {
 
     Ok(repository)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn main_is_missing_before_the_seeding() {
+        let service = ClusterService::new();
+        let error = service.main().await.unwrap_err();
+        assert!(matches!(error.current_context(), AppError::NoMainDatabase));
+    }
+
+    #[tokio::test]
+    async fn shards_cannot_start_without_the_main_database() {
+        let service = ClusterService::new();
+        let error = service.start_shards(2).await.unwrap_err();
+        assert!(matches!(error.current_context(), AppError::NoMainDatabase));
+    }
+}

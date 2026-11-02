@@ -77,4 +77,23 @@ mod tests {
             assert_eq!(shard, strategy.shard_for(key));
         }
     }
+
+    #[test]
+    fn same_key_goes_to_the_same_shard_in_any_instance() {
+        let first = HashStrategy::new(8).unwrap();
+        let second = HashStrategy::new(8).unwrap();
+        for key in [1, 42, 1_000_000, u64::MAX] {
+            assert_eq!(first.shard_for(key), second.shard_for(key));
+        }
+    }
+
+    #[test]
+    fn every_shard_receives_rows() {
+        let strategy = HashStrategy::new(16).unwrap();
+        let mut used = [false; 16];
+        for key in 1..=1000 {
+            used[strategy.shard_for(key)] = true;
+        }
+        assert!(used.iter().all(|&shard| shard));
+    }
 }

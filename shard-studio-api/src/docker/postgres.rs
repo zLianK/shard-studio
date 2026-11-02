@@ -92,4 +92,14 @@ mod tests {
         let port = next_postgres_port();
         assert_eq!(port, POSTGRES_PORT + 1);
     }
+
+    #[test]
+    fn container_body_exposes_the_given_host_port() {
+        let body = postgres_create_container_body(6543);
+
+        let bindings = body.host_config.unwrap().port_bindings.unwrap();
+        let binding = bindings["5432/tcp"].as_ref().unwrap();
+        assert_eq!(binding[0].host_port.as_deref(), Some("6543"));
+        assert_eq!(body.image.as_deref(), Some(POSTGRES_IMAGE));
+    }
 }

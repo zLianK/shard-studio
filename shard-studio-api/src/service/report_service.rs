@@ -75,3 +75,48 @@ async fn save(report: &Report) -> AppResult<()> {
 fn report_path(name: &str) -> PathBuf {
     PathBuf::from(REPORTS_DIR).join(format!("{name}.json"))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::{report_model::KeyFrequency, seed_model::Distribution};
+
+    fn seeding() -> SeedingReport {
+        SeedingReport {
+            distribution: Distribution::Uniform,
+            key_histogram: vec![KeyFrequency { key: 1, count: 2 }],
+        }
+    }
+
+    #[tokio::test]
+    async fn saving_without_seeding_fails() {
+        let service = ReportService::new();
+        let error = service.save_current().await.unwrap_err();
+        assert!(matches!(error.current_context(), AppError::NoCurrentReport));
+    }
+
+    #[tokio::test]
+    async fn seeding_is_kept_in_the_current_report() {
+        let service = ReportService::new();
+        service.set_seeding(seeding()).await;
+
+        let current = service.current().await;
+        let histogram = current.seeding.unwrap().key_histogram;
+        assert_eq!(histogram.len(), 1);
+        assert_eq!(histogram[0].count, 2);
+    }
+
+    #[tokio::test]
+    async fn reset_discards_the_seeding() {
+        let service = ReportService::new();
+        service.set_seeding(seeding()).await;
+        service.reset().await;
+        assert!(service.current().await.seeding.is_none());
+    }
+
+    #[test]
+    fn report_path_is_inside_the_reports_directory() {
+        let path = report_path("experiment");
+        assert_eq!(path, PathBuf::from(REPORTS_DIR).join("experiment.json"));
+    }
+}
