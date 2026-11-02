@@ -9,6 +9,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 
 /// PostgreSQL Repository.
+#[derive(Debug, Clone)]
 pub struct PostgresRepository {
     pool: PgPool,
 }
@@ -33,6 +34,11 @@ impl PostgresRepository {
                 }
             }
         }
+    }
+
+    /// Closes the connection pool.
+    pub async fn close(&self) {
+        self.pool.close().await;
     }
 
     /// Creates the table used to store generated data objects.
@@ -66,6 +72,37 @@ impl PostgresRepository {
         Ok(rows
             .into_iter()
             .map(|(key, count)| KeyFrequency { key, count })
+            .collect())
+    }
+
+    /// Returns up to `limit` rows after `after_row_id`.
+    pub async fn fetch_batch(
+        &self,
+        after_row_id: i64,
+        limit: i64,
+    ) -> AppResult<Vec<(i64, DataObject)>> {
+        let rows: Vec<(i64, i64, String)> = sqlx::query_as(
+            "SELECT row_id, id, text FROM data_objects WHERE row_id > $1 ORDER BY row_id LIMIT $2",
+        )
+        .bind(after_row_id)
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await
+        .change_context(AppError::DatabaseError(
+            "failed to fetch data objects batch".into(),
+        ))?;
+
+        Ok(rows
+            .into_iter()
+            .map(|(row_id, id, text)| {
+                (
+                    row_id,
+                    DataObject {
+                        id: id as u64,
+                        text,
+                    },
+                )
+            })
             .collect())
     }
 

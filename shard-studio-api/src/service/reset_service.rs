@@ -1,26 +1,28 @@
 use crate::{
-    docker::{remove_containers_with_prefix, utils::container_name_prefix},
     error::AppResult,
-    service::report_service::ReportService,
+    service::{cluster_service::ClusterService, report_service::ReportService},
 };
 use std::sync::Arc;
 
 /// Service responsible for resetting the simulation.
 #[derive(Debug, Clone)]
 pub struct ResetService {
+    cluster_service: Arc<ClusterService>,
     report_service: Arc<ReportService>,
 }
 
 impl ResetService {
-    pub fn new(report_service: Arc<ReportService>) -> Self {
-        Self { report_service }
+    pub fn new(cluster_service: Arc<ClusterService>, report_service: Arc<ReportService>) -> Self {
+        Self {
+            cluster_service,
+            report_service,
+        }
     }
 
     /// Resets the simulation by starting a new experiment report and
-    /// removing all containers created by the application.
+    /// resetting the cluster.
     pub async fn reset(&self) -> AppResult<()> {
-        let prefix = container_name_prefix();
         self.report_service.reset().await;
-        remove_containers_with_prefix(&prefix).await
+        self.cluster_service.reset().await
     }
 }

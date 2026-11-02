@@ -29,7 +29,11 @@ impl<T: DistributionStrategy> DataGenerator<T> {
     pub fn new(strategy: T, seed: u64) -> Self {
         let rng = StdRng::seed_from_u64(seed);
         let text = "a".repeat(TEXT_SIZE);
-        Self { strategy, rng, text }
+        Self {
+            strategy,
+            rng,
+            text,
+        }
     }
 
     /// Generates a data object using the distribution strategy.
@@ -97,5 +101,41 @@ pub mod test {
         }
         let ratio = hot as f64 / number_of_elements as f64;
         assert!((0.78..=0.82).contains(&ratio), "hot ratio was {ratio}");
+    }
+
+    #[test]
+    fn same_seed_generates_the_same_keys() {
+        let keys = |seed| {
+            let strategy = ZipfianStrategy::new(100).unwrap();
+            let mut generator = DataGenerator::new(strategy, seed);
+            (0..50).map(|_| generator.generate().id).collect::<Vec<_>>()
+        };
+
+        assert_eq!(keys(42), keys(42));
+        assert_ne!(keys(42), keys(43));
+    }
+
+    #[test]
+    fn zipfian_concentrates_rows_on_the_first_keys() {
+        let strategy = ZipfianStrategy::new(1000).unwrap();
+        let mut generator = DataGenerator::new(strategy, 42);
+
+        let mut first = 0;
+        let mut last = 0;
+        for _ in 0..10_000 {
+            match generator.generate().id {
+                1 => first += 1,
+                1000 => last += 1,
+                _ => {}
+            }
+        }
+        assert!(first > last * 10);
+    }
+
+    #[test]
+    fn strategies_reject_an_empty_key_space() {
+        assert!(UniformStrategy::new(0).is_err());
+        assert!(ZipfianStrategy::new(0).is_err());
+        assert!(HotspotStrategy::new(0).is_err());
     }
 }

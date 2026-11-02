@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { showError } from '../ErrorToast'
+import { post } from '../api'
 import './IconButton.css'
 import './ResetButton.css'
 
@@ -11,19 +11,8 @@ function ResetButton() {
 
   const handleReset = async () => {
     setLoading(true)
-    try {
-      const response = await fetch('/api/reset', { method: 'POST' })
-      if (!response.ok) {
-        const body = await response.json().catch(() => null)
-        console.error(`Reset failed (${response.status}):`, body?.error ?? body)
-        showError('An error occurred while resetting the simulation.')
-      }
-    } catch (error) {
-      console.error('Could not reach the API:', error)
-      showError('Could not reach the API.')
-    } finally {
-      setLoading(false)
-    }
+    await post('/reset', { error: 'An error occurred while resetting the simulation.' })
+    setLoading(false)
   }
 
   return (

@@ -53,3 +53,38 @@ pub struct KeyFrequency {
     pub key: i64,
     pub count: i64,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn new_report_is_named_after_the_prefix_and_has_no_seeding() {
+        let report = Report::new();
+        assert!(report.name.starts_with(REPORT_NAME_PREFIX));
+        assert!(report.seeding.is_none());
+    }
+
+    #[test]
+    fn report_is_serialized_with_the_shape_read_by_the_dashboards() {
+        let report = Report {
+            name: "experiment".into(),
+            seeding: Some(SeedingReport {
+                distribution: Distribution::Uniform,
+                key_histogram: vec![KeyFrequency { key: 1, count: 3 }],
+            }),
+        };
+
+        assert_eq!(
+            serde_json::to_value(&report).unwrap(),
+            json!({
+                "name": "experiment",
+                "seeding": {
+                    "distribution": "uniform",
+                    "key_histogram": [{ "key": 1, "count": 3 }],
+                },
+            })
+        );
+    }
+}

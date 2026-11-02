@@ -19,9 +19,9 @@ impl ZipfianStrategy {
     /// Creates a strategy over a key space of `k` keys.
     pub fn new(k: u64) -> AppResult<Self> {
         Ok(Self {
-            zipf: Zipf::new(k as f64, ZIPFIAN_CONSTANT).change_context(AppError::SeedDistributionError(
-                "failed to create zipfian strategy".to_string(),
-            ))?,
+            zipf: Zipf::new(k as f64, ZIPFIAN_CONSTANT).change_context(
+                AppError::SeedDistributionError("failed to create zipfian strategy".to_string()),
+            )?,
         })
     }
 }
