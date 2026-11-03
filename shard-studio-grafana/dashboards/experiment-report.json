@@ -1,0 +1,137 @@
+{
+  "uid": "experiment-report",
+  "title": "Experiment Report",
+  "schemaVersion": 39,
+  "version": 1,
+  "templating": {
+    "list": [
+      {
+        "name": "report",
+        "label": "Report",
+        "type": "query",
+        "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+        "query": {
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "url",
+            "format": "table",
+            "parser": "backend",
+            "url": "/",
+            "url_options": { "method": "GET" },
+            "root_selector": "$[type=\"file\" and $contains(name, \".json\")]",
+            "columns": [{ "selector": "name", "text": "name", "type": "string" }]
+          }
+        },
+        "refresh": 2,
+        "sort": 2,
+        "multi": false,
+        "includeAll": false,
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Seeding Distribution",
+      "gridPos": { "h": 2, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/${report}",
+          "url_options": { "method": "GET" },
+          "root_selector": "seeding",
+          "columns": [{ "selector": "distribution", "text": "distribution" }]
+        }
+      ],
+      "fieldConfig": { "defaults": { "noValue": "NOT RUN" } },
+      "options": {
+        "reduceOptions": { "fields": "/.*/" },
+        "colorMode": "none",
+        "text": { "valueSize": 20 }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Sharding Strategy",
+      "gridPos": { "h": 2, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/${report}",
+          "url_options": { "method": "GET" },
+          "root_selector": "sharding",
+          "columns": [{ "selector": "strategy", "text": "strategy" }]
+        }
+      ],
+      "fieldConfig": { "defaults": { "noValue": "NOT RUN" } },
+      "options": {
+        "reduceOptions": { "fields": "/.*/" },
+        "colorMode": "none",
+        "text": { "valueSize": 20 }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Shards",
+      "gridPos": { "h": 2, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/${report}",
+          "url_options": { "method": "GET" },
+          "root_selector": "sharding",
+          "columns": [{ "selector": "shards", "text": "shards" }]
+        }
+      ],
+      "fieldConfig": { "defaults": { "noValue": "NOT RUN" } },
+      "options": {
+        "reduceOptions": { "fields": "/.*/" },
+        "colorMode": "none",
+        "text": { "valueSize": 20 }
+      }
+    },
+    {
+      "id": 4,
+      "type": "histogram",
+      "title": "Key Histogram - Main Database",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 2 },
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/${report}",
+          "url_options": { "method": "GET" },
+          "root_selector": "seeding.key_histogram",
+          "columns": [
+            { "selector": "key", "text": "xMin" },
+            { "selector": "count", "text": "count" }
+          ]
+        }
+      ],
+      "options": {
+        "legend": { "showLegend": false }
+      }
+    }
+  ]
+}

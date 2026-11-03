@@ -33,7 +33,10 @@ async fn main() {
         cluster_service.clone(),
         report_service.clone(),
     ));
-    let shard_service = Arc::new(ShardService::new(cluster_service.clone()));
+    let shard_service = Arc::new(ShardService::new(
+        cluster_service.clone(),
+        report_service.clone(),
+    ));
     let reset_service = Arc::new(ResetService::new(
         cluster_service.clone(),
         report_service.clone(),

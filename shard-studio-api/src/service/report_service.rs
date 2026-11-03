@@ -1,6 +1,6 @@
 use crate::{
     error::{AppError, AppResult},
-    model::report_model::{Report, SeedingReport},
+    model::report_model::{Report, SeedingReport, ShardingReport},
 };
 use error_stack::{ResultExt, bail};
 use std::path::PathBuf;
@@ -27,6 +27,11 @@ impl ReportService {
     /// Sets the seeding stage of the current report.
     pub async fn set_seeding(&self, seeding: SeedingReport) {
         self.current.lock().await.seeding = Some(seeding);
+    }
+
+    /// Sets the sharding stage of the current report.
+    pub async fn set_sharding(&self, sharding: ShardingReport) {
+        self.current.lock().await.sharding = Some(sharding);
     }
 
     /// Writes the current report to disk and returns its name.
@@ -79,7 +84,9 @@ fn report_path(name: &str) -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{report_model::KeyFrequency, seed_model::Distribution};
+    use crate::model::{
+        report_model::KeyFrequency, seed_model::Distribution, shard_model::ShardingAlgorithm,
+    };
 
     fn seeding() -> SeedingReport {
         SeedingReport {
@@ -107,11 +114,35 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn reset_discards_the_seeding() {
+    async fn sharding_is_kept_in_the_current_report() {
+        let service = ReportService::new();
+        service
+            .set_sharding(ShardingReport {
+                strategy: ShardingAlgorithm::Hash,
+                shards: 4,
+            })
+            .await;
+
+        let sharding = service.current().await.sharding.unwrap();
+        assert_eq!(sharding.shards, 4);
+    }
+
+    #[tokio::test]
+    async fn reset_discards_the_seeding_and_the_sharding() {
         let service = ReportService::new();
         service.set_seeding(seeding()).await;
+        service
+            .set_sharding(ShardingReport {
+                strategy: ShardingAlgorithm::Hash,
+                shards: 4,
+            })
+            .await;
+
         service.reset().await;
-        assert!(service.current().await.seeding.is_none());
+
+        let current = service.current().await;
+        assert!(current.seeding.is_none());
+        assert!(current.sharding.is_none());
     }
 
     #[test]

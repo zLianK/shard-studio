@@ -1,6 +1,9 @@
 use crate::{
     error::AppResult,
-    model::seed_model::{Distribution, SeedRequest},
+    model::{
+        seed_model::{Distribution, SeedRequest},
+        shard_model::{ShardRequest, ShardingAlgorithm},
+    },
     repository::postgres::PostgresRepository,
 };
 use serde::{Deserialize, Serialize};
@@ -14,6 +17,7 @@ const REPORT_NAME_PREFIX: &str = "shard-studio-experiment";
 pub struct Report {
     pub name: String,
     pub seeding: Option<SeedingReport>,
+    pub sharding: Option<ShardingReport>,
 }
 
 impl Report {
@@ -26,6 +30,7 @@ impl Report {
         Self {
             name,
             seeding: None,
+            sharding: None,
         }
     }
 }
@@ -44,6 +49,23 @@ impl SeedingReport {
             distribution: request.distribution,
             key_histogram: repository.key_histogram().await?,
         })
+    }
+}
+
+/// Data collected in the sharding stage.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ShardingReport {
+    pub strategy: ShardingAlgorithm,
+    pub shards: u64,
+}
+
+impl ShardingReport {
+    /// Creates the report of the sharding stage.
+    pub fn new(request: &ShardRequest) -> Self {
+        Self {
+            strategy: request.strategy,
+            shards: request.shards,
+        }
     }
 }
 
@@ -74,6 +96,10 @@ mod tests {
                 distribution: Distribution::Uniform,
                 key_histogram: vec![KeyFrequency { key: 1, count: 3 }],
             }),
+            sharding: Some(ShardingReport {
+                strategy: ShardingAlgorithm::Hash,
+                shards: 4,
+            }),
         };
 
         assert_eq!(
@@ -81,10 +107,31 @@ mod tests {
             json!({
                 "name": "experiment",
                 "seeding": {
-                    "distribution": "uniform",
+                    "distribution": "UNIFORM",
                     "key_histogram": [{ "key": 1, "count": 3 }],
                 },
+                "sharding": { "strategy": "HASH", "shards": 4 },
             })
         );
+    }
+
+    #[test]
+    fn stages_not_run_yet_are_serialized_as_null() {
+        let value = serde_json::to_value(Report::new()).unwrap();
+        assert!(value["seeding"].is_null());
+        assert!(value["sharding"].is_null());
+    }
+
+    #[test]
+    fn sharding_report_keeps_the_parameters_of_the_request() {
+        let request = ShardRequest {
+            strategy: ShardingAlgorithm::Hash,
+            shards: 3,
+        };
+
+        let report = ShardingReport::new(&request);
+
+        assert!(matches!(report.strategy, ShardingAlgorithm::Hash));
+        assert_eq!(report.shards, 3);
     }
 }

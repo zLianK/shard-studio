@@ -1,9 +1,12 @@
 use crate::{
     error::{AppError, AppResult},
     generator::DataObject,
-    model::shard_model::{ShardRequest, ShardingAlgorithm},
+    model::{
+        report_model::ShardingReport,
+        shard_model::{ShardRequest, ShardingAlgorithm},
+    },
     repository::postgres::PostgresRepository,
-    service::cluster_service::ClusterService,
+    service::{cluster_service::ClusterService, report_service::ReportService},
     sharding::{hash::HashStrategy, strategy::ShardingStrategy},
 };
 use error_stack::bail;
@@ -20,11 +23,15 @@ const BATCH_SIZE: i64 = 1000;
 #[derive(Debug, Clone)]
 pub struct ShardService {
     cluster_service: Arc<ClusterService>,
+    report_service: Arc<ReportService>,
 }
 
 impl ShardService {
-    pub fn new(cluster_service: Arc<ClusterService>) -> Self {
-        Self { cluster_service }
+    pub fn new(cluster_service: Arc<ClusterService>, report_service: Arc<ReportService>) -> Self {
+        Self {
+            cluster_service,
+            report_service,
+        }
     }
 
     /// Handles the sharding request. Distributes the rows of the main
@@ -43,6 +50,10 @@ impl ShardService {
 
         let moved = distribute_rows(&main, &shards, strategy.as_ref()).await?;
         info!("Moved {} data objects to {} shards", moved, shards.len());
+
+        self.report_service
+            .set_sharding(ShardingReport::new(&request))
+            .await;
         Ok(())
     }
 }
