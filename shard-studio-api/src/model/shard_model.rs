@@ -1,8 +1,8 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// The strategy used to decide which shard each row is written to.
-#[derive(Debug, Clone, Copy, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all(serialize = "UPPERCASE", deserialize = "lowercase"))]
 pub enum ShardingAlgorithm {
     Hash,
 }
@@ -26,6 +26,12 @@ mod tests {
             serde_json::from_str(r#"{"strategy":"hash","shards":3}"#).unwrap();
         assert!(matches!(request.strategy, ShardingAlgorithm::Hash));
         assert_eq!(request.shards, 3);
+    }
+
+    #[test]
+    fn strategy_is_serialized_in_uppercase() {
+        let json = serde_json::to_string(&ShardingAlgorithm::Hash).unwrap();
+        assert_eq!(json, r#""HASH""#);
     }
 
     #[test]

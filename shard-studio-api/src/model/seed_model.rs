@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 /// The distribution used to generate the keys of the seeded rows.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all(serialize = "UPPERCASE", deserialize = "lowercase"))]
 pub enum Distribution {
     Uniform,
     Zipfian,
@@ -46,8 +46,8 @@ mod tests {
     }
 
     #[test]
-    fn distribution_is_serialized_in_lowercase() {
+    fn distribution_is_serialized_in_uppercase() {
         let json = serde_json::to_string(&Distribution::Hotspot).unwrap();
-        assert_eq!(json, r#""hotspot""#);
+        assert_eq!(json, r#""HOTSPOT""#);
     }
 }
