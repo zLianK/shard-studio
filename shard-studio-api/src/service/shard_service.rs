@@ -1,6 +1,5 @@
 use crate::{
     error::{AppError, AppResult},
-    generator::DataObject,
     model::{
         report_model::ShardingReport,
         shard_model::{ShardRequest, ShardingAlgorithm},
@@ -61,30 +60,39 @@ impl ShardService {
 }
 
 /// Reads every row of the main database, in batches, and writes each one
-/// to the shard chosen by the strategy. Returns the number of rows moved.
+/// to the shard chosen by the strategy. Each shard is loaded within a single
+/// transaction, committed only after every row was written. Returns the
+/// number of rows moved.
 async fn distribute_rows(
     main: &PostgresRepository,
     shards: &[PostgresRepository],
     strategy: &dyn ShardingStrategy,
 ) -> AppResult<u64> {
+    let mut loads = Vec::with_capacity(shards.len());
+    for shard in shards {
+        loads.push(shard.bulk_load().await?);
+    }
+
     let mut moved = 0;
     let mut last_row_id = 0;
     loop {
         let batch = main.fetch_batch(last_row_id, BATCH_SIZE).await?;
         let Some((row_id, _)) = batch.last() else {
-            return Ok(moved);
+            break;
         };
         last_row_id = *row_id;
         moved += batch.len() as u64;
 
-        let mut per_shard: Vec<Vec<DataObject>> = vec![Vec::new(); shards.len()];
         for (_, object) in batch {
-            per_shard[strategy.shard_for(object.id)].push(object);
-        }
-        for (shard, objects) in shards.iter().zip(&per_shard) {
-            shard.save_all(objects).await?;
+            loads[strategy.shard_for(object.id)].add(object).await?;
         }
     }
+
+    for load in loads {
+        load.commit().await?;
+    }
+
+    Ok(moved)
 }
 
 /// Builds the sharding strategy described by the request.

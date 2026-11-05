@@ -1,7 +1,7 @@
 use crate::{
     error::AppResult,
     generator::{
-        DataGenerator, DataObject, hotspot::HotspotStrategy, strategy::DistributionStrategy,
+        DataGenerator, hotspot::HotspotStrategy, strategy::DistributionStrategy,
         uniform::UniformStrategy, zipfian::ZipfianStrategy,
     },
     model::{
@@ -16,9 +16,6 @@ use tracing::info;
 
 /// A constant seed value for reproducibility.
 const SEED: u64 = 42;
-
-/// Number of generated items buffered before being written to the database.
-const BATCH_SIZE: usize = 1000;
 
 /// Service responsible for handling seeding operations.
 #[derive(Debug, Clone)]
@@ -64,15 +61,11 @@ async fn data_seeding(repository: &PostgresRepository, request: &SeedRequest) ->
     };
 
     let mut generator = DataGenerator::new(strategy, SEED);
-    let mut buffer: Vec<DataObject> = Vec::with_capacity(BATCH_SIZE);
+    let mut load = repository.bulk_load().await?;
     for _ in 0..n {
-        buffer.push(generator.generate());
-        if buffer.len() == BATCH_SIZE {
-            repository.save_all(&buffer).await?;
-            buffer.clear();
-        }
+        load.add(generator.generate()).await?;
     }
-    repository.save_all(&buffer).await?;
+    load.commit().await?;
 
     info!("Seeded {} data objects into PostgreSQL", n);
     Ok(())
