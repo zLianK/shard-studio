@@ -11,7 +11,7 @@ use crate::{
     repository::postgres::PostgresRepository,
     service::{cluster_service::ClusterService, report_service::ReportService},
 };
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 use tracing::info;
 
 /// A constant seed value for reproducibility.
@@ -39,9 +39,16 @@ impl SeedService {
     /// following the requested distribution.
     pub async fn seed(&self, request: SeedRequest) -> AppResult<()> {
         let repository = self.cluster_service.start_main().await?;
+
+        let started = Instant::now();
         data_seeding(&repository, &request).await?;
-        let seeding = SeedingReport::new(&request, &repository).await?;
+        let elapsed = started.elapsed();
+
+        let seeding = SeedingReport::new(&request)
+            .key_histogram(repository.key_histogram().await?)
+            .duration(elapsed);
         self.report_service.set_seeding(seeding).await;
+
         Ok(())
     }
 }

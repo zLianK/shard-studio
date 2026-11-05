@@ -110,9 +110,59 @@
     },
     {
       "id": 4,
+      "type": "stat",
+      "title": "Seeding Time",
+      "gridPos": { "h": 2, "w": 12, "x": 0, "y": 2 },
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/${report}",
+          "url_options": { "method": "GET" },
+          "root_selector": "seeding",
+          "columns": [{ "selector": "duration_secs", "text": "duration", "type": "number" }]
+        }
+      ],
+      "fieldConfig": { "defaults": { "noValue": "NOT RUN", "unit": "suffix: s", "decimals": 3 } },
+      "options": {
+        "reduceOptions": { "fields": "/.*/" },
+        "colorMode": "none",
+        "text": { "valueSize": 20 }
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Sharding Time",
+      "gridPos": { "h": 2, "w": 12, "x": 12, "y": 2 },
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/${report}",
+          "url_options": { "method": "GET" },
+          "root_selector": "sharding",
+          "columns": [{ "selector": "duration_secs", "text": "duration", "type": "number" }]
+        }
+      ],
+      "fieldConfig": { "defaults": { "noValue": "NOT RUN", "unit": "suffix: s", "decimals": 3 } },
+      "options": {
+        "reduceOptions": { "fields": "/.*/" },
+        "colorMode": "none",
+        "text": { "valueSize": 20 }
+      }
+    },
+    {
+      "id": 6,
       "type": "histogram",
       "title": "Key Histogram - Main Database",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 2 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 4 },
       "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "shard-studio-reports" },
       "targets": [
         {

@@ -10,7 +10,7 @@ use crate::{
     sharding::{hash::HashStrategy, strategy::ShardingStrategy},
 };
 use error_stack::bail;
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 use tracing::info;
 
 /// Maximum number of shards, as each one is a container.
@@ -48,12 +48,14 @@ impl ShardService {
             request.strategy, request.shards
         );
 
+        let started = Instant::now();
         let moved = distribute_rows(&main, &shards, strategy.as_ref()).await?;
+        let elapsed = started.elapsed();
+
         info!("Moved {} data objects to {} shards", moved, shards.len());
 
-        self.report_service
-            .set_sharding(ShardingReport::new(&request))
-            .await;
+        let sharding = ShardingReport::new(&request).duration(elapsed);
+        self.report_service.set_sharding(sharding).await;
         Ok(())
     }
 }

@@ -91,6 +91,7 @@ mod tests {
     fn seeding() -> SeedingReport {
         SeedingReport {
             distribution: Distribution::Uniform,
+            duration_secs: 1.0,
             key_histogram: vec![KeyFrequency { key: 1, count: 2 }],
         }
     }
@@ -120,6 +121,7 @@ mod tests {
             .set_sharding(ShardingReport {
                 strategy: ShardingAlgorithm::Hash,
                 shards: 4,
+                duration_secs: 1.0,
             })
             .await;
 
@@ -135,6 +137,7 @@ mod tests {
             .set_sharding(ShardingReport {
                 strategy: ShardingAlgorithm::Hash,
                 shards: 4,
+                duration_secs: 1.0,
             })
             .await;
 
