@@ -1,13 +1,9 @@
-use crate::{
-    error::AppResult,
-    model::{
-        seed_model::{Distribution, SeedRequest},
-        shard_model::{ShardRequest, ShardingAlgorithm},
-    },
-    repository::postgres::PostgresRepository,
+use crate::model::{
+    seed_model::{Distribution, SeedRequest},
+    shard_model::{ShardRequest, ShardingAlgorithm},
 };
 use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 /// Prefix of the name of every experiment report.
 const REPORT_NAME_PREFIX: &str = "shard-studio-experiment";
@@ -35,20 +31,39 @@ impl Report {
     }
 }
 
+/// Converts a duration to seconds.
+fn duration_to_secs(duration: Duration) -> f64 {
+    duration.as_millis() as f64 / 1000.0
+}
+
 /// Data collected in the seeding stage.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SeedingReport {
     pub distribution: Distribution,
+    pub duration_secs: f64,
     pub key_histogram: Vec<KeyFrequency>,
 }
 
 impl SeedingReport {
-    /// Creates the report of the seeding stage
-    pub async fn new(request: &SeedRequest, repository: &PostgresRepository) -> AppResult<Self> {
-        Ok(Self {
+    /// Creates the report of the seeding stage.
+    pub fn new(request: &SeedRequest) -> Self {
+        Self {
             distribution: request.distribution,
-            key_histogram: repository.key_histogram().await?,
-        })
+            duration_secs: 0.0,
+            key_histogram: Vec::new(),
+        }
+    }
+
+    /// Sets the number of rows stored under each key.
+    pub fn key_histogram(mut self, key_histogram: Vec<KeyFrequency>) -> Self {
+        self.key_histogram = key_histogram;
+        self
+    }
+
+    /// Sets the time taken to insert the rows.
+    pub fn duration(mut self, duration: Duration) -> Self {
+        self.duration_secs = duration_to_secs(duration);
+        self
     }
 }
 
@@ -57,6 +72,7 @@ impl SeedingReport {
 pub struct ShardingReport {
     pub strategy: ShardingAlgorithm,
     pub shards: u64,
+    pub duration_secs: f64,
 }
 
 impl ShardingReport {
@@ -65,7 +81,14 @@ impl ShardingReport {
         Self {
             strategy: request.strategy,
             shards: request.shards,
+            duration_secs: 0.0,
         }
+    }
+
+    /// Sets the time taken to distribute the rows.
+    pub fn duration(mut self, duration: Duration) -> Self {
+        self.duration_secs = duration_to_secs(duration);
+        self
     }
 }
 
@@ -94,11 +117,13 @@ mod tests {
             name: "experiment".into(),
             seeding: Some(SeedingReport {
                 distribution: Distribution::Uniform,
+                duration_secs: 1.234,
                 key_histogram: vec![KeyFrequency { key: 1, count: 3 }],
             }),
             sharding: Some(ShardingReport {
                 strategy: ShardingAlgorithm::Hash,
                 shards: 4,
+                duration_secs: 0.5,
             }),
         };
 
@@ -108,9 +133,10 @@ mod tests {
                 "name": "experiment",
                 "seeding": {
                     "distribution": "UNIFORM",
+                    "duration_secs": 1.234,
                     "key_histogram": [{ "key": 1, "count": 3 }],
                 },
-                "sharding": { "strategy": "HASH", "shards": 4 },
+                "sharding": { "strategy": "HASH", "shards": 4, "duration_secs": 0.5 },
             })
         );
     }
@@ -129,9 +155,17 @@ mod tests {
             shards: 3,
         };
 
-        let report = ShardingReport::new(&request);
+        let report = ShardingReport::new(&request).duration(Duration::from_millis(1500));
 
         assert!(matches!(report.strategy, ShardingAlgorithm::Hash));
         assert_eq!(report.shards, 3);
+        assert_eq!(report.duration_secs, 1.5);
+    }
+
+    #[test]
+    fn duration_is_reported_in_seconds_with_milliseconds() {
+        assert_eq!(duration_to_secs(Duration::from_micros(1_234_999)), 1.234);
+        assert_eq!(duration_to_secs(Duration::from_millis(7)), 0.007);
+        assert_eq!(duration_to_secs(Duration::ZERO), 0.0);
     }
 }

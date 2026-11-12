@@ -17,6 +17,20 @@ pub struct DataObject {
     pub text: String,
 }
 
+impl DataObject {
+    #[cfg(test)]
+    pub fn new(id: u64, text: &str) -> Self {
+        let text = text.to_string();
+        Self { id, text }
+    }
+
+    /// Returns the bytes of the data object as a line of
+    /// the database COPY text format.
+    pub fn into_row(&self) -> Vec<u8> {
+        format!("{}\t{}\n", self.id, self.text).into_bytes()
+    }
+}
+
 /// A data generator that uses a distribution strategy
 /// to generate data objects.
 pub struct DataGenerator<T: DistributionStrategy> {
@@ -53,6 +67,12 @@ pub mod test {
     use crate::generator::hotspot::HotspotStrategy;
     use crate::generator::uniform::UniformStrategy;
     use crate::generator::zipfian::ZipfianStrategy;
+
+    #[test]
+    fn row_is_a_tab_separated_line() {
+        let object = DataObject::new(7, "abc");
+        assert_eq!(object.into_row(), b"7\tabc\n");
+    }
 
     #[test]
     fn generate_zipfian_test() {

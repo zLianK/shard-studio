@@ -4,9 +4,19 @@ use crate::{
     model::report_model::KeyFrequency,
 };
 use error_stack::{IntoReport, ResultExt, bail};
-use sqlx::{PgPool, QueryBuilder, postgres::PgPoolOptions};
+use sqlx::{
+    PgPool, Postgres,
+    pool::PoolConnection,
+    postgres::{PgCopyIn, PgPoolCopyExt, PgPoolOptions},
+};
 use std::time::Duration;
 use tokio::time::sleep;
+
+/// Statement that opens the stream of a bulk load.
+const COPY_STATEMENT: &str = "COPY data_objects (id, text) FROM STDIN";
+
+/// Number of bytes buffered by a bulk load before they are sent to the database.
+const FLUSH_BYTES: usize = 256 * 1024;
 
 /// PostgreSQL Repository.
 #[derive(Debug, Clone)]
@@ -106,25 +116,60 @@ impl PostgresRepository {
             .collect())
     }
 
-    /// Saves all of the given data objects to the database.
-    pub async fn save_all(&self, items: &[DataObject]) -> AppResult<()> {
-        if items.is_empty() {
-            return Ok(());
+    /// Starts a bulk load. The data objects are streamed to the database with
+    /// a single copy, which is committed only once, at the end.
+    pub async fn bulk_load(&self) -> AppResult<BulkLoad> {
+        Ok(BulkLoad::new(
+            self.pool
+                .copy_in_raw(COPY_STATEMENT)
+                .await
+                .change_context(AppError::DatabaseError("failed to begin bulk load".into()))?,
+        ))
+    }
+}
+
+/// A bulk load into the database. Dropping it without
+/// calling commit discards everything added through it.
+pub struct BulkLoad {
+    copy: PgCopyIn<PoolConnection<Postgres>>,
+    buffer: Vec<u8>,
+}
+
+impl BulkLoad {
+    /// Creates a new bulk load.
+    pub fn new(copy: PgCopyIn<PoolConnection<Postgres>>) -> Self {
+        let buffer = Vec::new();
+        Self { copy, buffer }
+    }
+
+    /// Adds a data object, sending the buffered ones once there are enough.
+    pub async fn add(&mut self, object: DataObject) -> AppResult<()> {
+        self.buffer.extend_from_slice(&object.into_row());
+        if self.buffer.len() >= FLUSH_BYTES {
+            self.flush().await?;
         }
+        Ok(())
+    }
 
-        let mut query_builder = QueryBuilder::new("INSERT INTO data_objects (id, text) ");
-        query_builder.push_values(items, |mut builder, item| {
-            builder.push_bind(item.id as i64).push_bind(&item.text);
-        });
+    /// Sends the buffered data objects and commits the load.
+    pub async fn commit(mut self) -> AppResult<()> {
+        self.flush().await?;
+        self.copy
+            .finish()
+            .await
+            .change_context(AppError::DatabaseError("failed to commit bulk load".into()))?;
+        Ok(())
+    }
 
-        query_builder
-            .build()
-            .execute(&self.pool)
+    /// Flushes the buffered data objects to the database.
+    async fn flush(&mut self) -> AppResult<()> {
+        self.copy
+            .send(self.buffer.as_slice())
             .await
             .change_context(AppError::DatabaseError(
-                "failed to insert data objects batch".into(),
+                "failed to send data objects to the database".into(),
             ))?;
-
+        self.buffer.clear();
         Ok(())
     }
 }
